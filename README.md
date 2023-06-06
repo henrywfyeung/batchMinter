@@ -1,9 +1,15 @@
 # batchMinter
 
+## node version
+Tested node version 16.15
+
 ## installation
 ```
 yarn
 ```
+
+## environment variables setup
+Required env variables can be found in the .env.example file
 
 ## batch fund account from main address
 wallets: number of wallets to use \
