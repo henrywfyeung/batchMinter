@@ -9,7 +9,7 @@ yarn
 ```
 
 ## environment variables setup
-Required env variables can be found in the .env.example file
+Required env variables can be found in the .env.example file. Copy .env.example to .env and fill in the missing variables.
 
 ## batch fund account from main address
 wallets: number of wallets to use \
