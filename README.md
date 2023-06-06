@@ -11,9 +11,9 @@ yarn
 ## environment variables setup
 Required env variables can be found in the .env.example file. Copy .env.example to .env and fill in the missing variables.
 
-## batch fund account from main address
+## batch fund multiple addresses from main address
 wallets: number of wallets to use \
-fund: the amount of native tokens per wallet \
+fund: the amount of native tokens per wallet
 ```
 node ./src/batchMinter.js --stage=fund --wallets=10 --fund=0.02
 ```
