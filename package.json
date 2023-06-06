@@ -1,0 +1,15 @@
+{
+  "name": "batchminter",
+  "version": "1.0.0",
+  "description": "",
+  "author": "henrywfyeung",
+  "license": "ISC",
+  "homepage": "https://github.com/henrywfyeung/batchminter#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "node-fetch": "^3.3.0",
+    "stdio": "^2.1.1"
+  },
+  "type": "module"
+}
