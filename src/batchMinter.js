@@ -49,32 +49,25 @@ let walletList = [];
 // =================================================================================================
 if (stage === "fund") {
     // distribute token to different addresses
-    const initialise_wallets = async (mnemonic, wallet_num, from_wallet_number) => {
-        let from_wallet = masterWalletList[from_wallet_number];
-        
-        let walletList = [];
-        for ( let i = 0 ; i < wallet_num ; i ++ ) {
-            // get wallet and connect to provider
-            let wallet = Wallet.fromMnemonic(mnemonic, path + (from_wallet_number * wallet_num + i + 1).toString()).connect(provider);
-            // disperse matic if not sufficient
+    const initialise_wallets = async (mnemonic, to_wallet_number) => {
+        await Promise.all(masterWalletList.map(async (masterWallet, j)=>{
+            let wallet = Wallet.fromMnemonic(mnemonic, path + (masterWalletNumber * to_wallet_number + j + 1).toString()).connect(provider);
             let balance = await wallet.getBalance();
             if (balance.lt(ethers.utils.parseEther(fund))) {
-                console.log("Transferring ether to address" + (from_wallet_number * wallet_num + i+1).toString());
-                const tx = await from_wallet.sendTransaction({
+                console.log("Transferring ether to address" + (masterWalletNumber * to_wallet_number + j + 1).toString());
+                const tx = await masterWallet.sendTransaction({
                     to: await wallet.getAddress(),
                     value: ethers.utils.parseEther(fund).sub(balance),
                 }, {gasPrice: ethers.utils.parseUnits(gasPrice, "gwei")});
                 await tx.wait();
             }
-            console.log("Funded", i, "wallet", await wallet.getAddress(), (await wallet.getBalance()).toString());
-            walletList.push(wallet);
-        }
-        return walletList;
+            console.log("Funded wallet", await wallet.getAddress(), (await wallet.getBalance()).toString());
+        }));
     }
 
     // initialise wallets, please do it before the real minting event to save time
-    for (let i = 0; i < masterWalletNumber; i++) {
-        walletList = await initialise_wallets(mnemonic, walletNumber, i);
+    for (let i = 0; i < walletNumber; i++) {
+        walletList = await initialise_wallets(mnemonic, i);
     }
 }
 
@@ -112,7 +105,7 @@ if (stage === "mint") {
         }
     }));
 
-    console.log("Success: " + success.toString() + "/" + walletNumber.toString());
+    console.log("Success: " + success.toString() + "/" + (masterWalletNumber*walletNumber).toString());
 }
 
 if (stage === "transfer") {
