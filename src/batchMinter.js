@@ -29,7 +29,7 @@ for (let i = 0; i < masterWalletNumber; i++) {
 let ops = stdio.getopt({
     'mintAmount': {key: 'm', default: 10, args: 1, description: 'The number of wallets to fill'},
     'wallets': {key: 'w', default: 10, args: 1, description: 'The number of wallets to fill'},
-    'fund': {key: 'f', default: "0.002", args: 1, description: 'The amount of ether to fund each of the wallet with'},
+    'fund': {key: 'f', default: "0.0015", args: 1, description: 'The amount of ether to fund each of the wallet with'},
     'stage': {key:"s", args: 1, default: "init", required: true, description: 'The stage of the script to run. init, mint, or refund'},
     'gasPrice': {key:"g", args: 1, default: "0.3", description: 'The gas price to use for transactions'}
 });
