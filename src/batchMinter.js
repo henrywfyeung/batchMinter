@@ -19,10 +19,9 @@ let masterWalletNumber = 20;
 const masterWalletList = [];
 for (let i = 0; i < masterWalletNumber; i++) {
     let wallet = Wallet.fromMnemonic(fundMnemonic, path + (i+1).toString()).connect(provider);
-    console.log(await wallet.getAddress());
-    // check balance
-    let balance = await wallet.getBalance();
-    console.log(balance.toString());
+    // console.log(await wallet.getAddress());
+    // let balance = await wallet.getBalance();
+    // console.log(balance.toString());
     masterWalletList.push(wallet);
 }
 
@@ -114,7 +113,7 @@ if (stage === "transfer") {
         contract_artifacts.abi,
         new ethers.providers.JsonRpcProvider(zksync_rpc_api)
     );
-
+    
     // distribute token to different addresses
     const transferTokens = async (from_wallet, to_wallet) => {
         let fromAddress  = await from_wallet.getAddress();
@@ -134,28 +133,26 @@ if (stage === "transfer") {
         return BigNumber.from(0);
     }
 
-    const transfer_tokens_from_all_wallets = async (mnemonic, wallet_num, targetWallet) => {
-        let walletList = [];
-        for ( let i = 0 ; i < wallet_num ; i ++ ) {
-            // get wallet and connect to provider
-            let wallet = Wallet.fromMnemonic(mnemonic, path + (i+1).toString()).connect(provider);
-            walletList.push(wallet);
-        }
-        let totalTransfered = BigNumber.from(0);
-        await Promise.all(walletList.map(async (wallet) => {
-            try {
-                const transferedAmount = await transferTokens(wallet, targetWallet);
-                totalTransfered = totalTransfered.add(transferedAmount);
-            } catch (e) {
-                console.log(e);
+    const transfer_tokens_from_all_wallets = async (mnemonic) => {
+        const transferPairs = [];
+        masterWalletList.forEach((masterWallet, j) => {
+            for (let i = 0; i < walletNumber; i++) {
+                let wallet = Wallet.fromMnemonic(mnemonic, path + (walletNumber * j + i + 1).toString()).connect(provider);
+                transferPairs.push([wallet, masterWallet]);
             }
+        });
+        console.log("Total transfer pairs: ", transferPairs.length.toString());
+
+        let totalTransfered = BigNumber.from(0);
+        await Promise.all(transferPairs.map(async (transferPair, j)=>{
+            const [wallet, masterWallet] = transferPair;
+            const transferedAmount = await transferTokens(wallet, masterWallet);
+            totalTransfered = totalTransfered.add(transferedAmount);
         }));
-        console.log("Total refunded: ", totalTransfered.toString());
+        console.log("Total transfered: ", totalTransfered.toString());
     }
 
-    // initialise wallets, please do it before the real minting event to save time
-    await transfer_tokens_from_all_wallets(mnemonic, walletNumber, tokenVaultSigner);
-    console.log(`Total wallets refunded: ${walletList.length}`);
+    await transfer_tokens_from_all_wallets(mnemonic);
 }
 
 if (stage === "refund") {
@@ -179,24 +176,24 @@ if (stage === "refund") {
     }
 
     const refund_all_wallets = async (mnemonic, wallet_num, targetWallet) => {
-        let walletList = [];
-        for ( let i = 0 ; i < wallet_num ; i ++ ) {
-            // get wallet and connect to provider
-            let wallet = Wallet.fromMnemonic(mnemonic, path + (i+1).toString()).connect(provider);
-            walletList.push(wallet);
-        }
-        let totalRefunded = BigNumber.from(0);
-        await Promise.all(walletList.map(async (wallet) => {
-            try {
-                const refundedAmount = await refund_wallets(wallet, targetWallet);
-                totalRefunded = totalRefunded.add(refundedAmount);
-            } catch (e) {
-                console.log(e);
+        const transferPairs = [];
+        masterWalletList.forEach((masterWallet, j) => {
+            for (let i = 0; i < walletNumber; i++) {
+                let wallet = Wallet.fromMnemonic(mnemonic, path + (walletNumber * j + i + 1).toString()).connect(provider);
+                transferPairs.push([wallet, masterWallet]);
             }
+        });
+        console.log("Total transfer pairs: ", transferPairs.length.toString());
+
+        let totalRefunded = BigNumber.from(0);
+        await Promise.all(transferPairs.map(async (transferPair, j)=>{
+            const [wallet, masterWallet] = transferPair;
+            const refundedAmount = await refund_wallets(wallet, masterWallet);
+            totalRefunded = totalRefunded.add(refundedAmount);
         }));
         console.log("Total refunded: ", totalRefunded.toString());
     }
 
     // initialise wallets, please do it before the real minting event to save time
-    await refund_all_wallets(mnemonic, walletNumber, tokenVaultSigner);
+    await refund_all_wallets(mnemonic);
 }
